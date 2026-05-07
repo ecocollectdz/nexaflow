@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexaFlow — Gestion Commerciale</title>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#08090e;--s1:#0e1018;--s2:#13151f;--s3:#181b27;
+  --border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.1);
+  --blue:#4f8ef7;--blue-dim:rgba(79,142,247,.12);
+  --cyan:#22d3ee;--green:#22c55e;--green-dim:rgba(34,197,94,.12);
+  --red:#f43f5e;--red-dim:rgba(244,63,94,.12);
+  --amber:#fbbf24;--amber-dim:rgba(251,191,36,.12);
+  --purple:#a78bfa;--purple-dim:rgba(167,139,250,.12);
+  --t1:#f1f5f9;--t2:#94a3b8;--t3:#475569;
+  --sidebar:256px;--radius:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--t1);display:flex;min-height:100vh;font-size:14px}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);min-height:100vh;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:200}
+.logo{padding:22px 20px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.logo-mark{width:36px;height:36px;background:linear-gradient(135deg,#4f8ef7,#22d3ee);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:18px;color:#fff;box-shadow:0 0 20px rgba(79,142,247,.35);flex-shrink:0}
+.logo-name{font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:18px;background:linear-gradient(90deg,#f1f5f9,#94a3b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-tag{font-size:10px;color:var(--t3);letter-spacing:.05em;margin-top:-4px}
+.nav{flex:1;padding:14px 10px;overflow-y:auto}
+.nav-label{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);padding:14px 10px 6px;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;border-radius:8px;color:var(--t2);font-size:13.5px;font-weight:500;transition:all .15s;position:relative;margin-bottom:1px;user-select:none}
+.nav-item:hover{background:var(--s2);color:var(--t1)}
+.nav-item.active{background:var(--blue-dim);color:var(--blue)}
+.nav-item.active::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:3px;background:var(--blue);border-radius:0 3px 3px 0}
+.nav-icon{width:16px;height:16px;flex-shrink:0;opacity:.8}
+.nav-item.active .nav-icon,.nav-item:hover .nav-icon{opacity:1}
+.nav-badge{margin-left:auto;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700}
+.badge-blue{background:var(--blue-dim);color:var(--blue)}
+.badge-red{background:var(--red-dim);color:var(--red)}
+.badge-green{background:var(--green-dim);color:var(--green)}
+.badge-amber{background:var(--amber-dim);color:var(--amber)}
+.nav-group-toggle{display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;border-radius:8px;color:var(--t2);font-size:13.5px;font-weight:500;transition:all .15s;user-select:none}
+.nav-group-toggle:hover{background:var(--s2);color:var(--t1)}
+.nav-group-arrow{margin-left:auto;width:14px;height:14px;transition:transform .2s}
+.nav-group-toggle.open .nav-group-arrow{transform:rotate(90deg)}
+.nav-sub{overflow:hidden;max-height:0;transition:max-height .3s ease}
+.nav-sub.open{max-height:300px}
+.nav-sub .nav-item{padding:7px 12px 7px 38px;font-size:13px}
+.sidebar-user{padding:14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;cursor:pointer}
+.ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0}
+.user-name{font-size:13px;font-weight:600}
+.user-role{font-size:11px;color:var(--t3)}
+
+/* MAIN */
+.main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{height:58px;background:var(--s1);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:0 28px;position:sticky;top:0;z-index:100}
+.topbar-left{display:flex;align-items:center;gap:8px;flex:1}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--t2)}
+.breadcrumb span{color:var(--t1);font-weight:600}
+.search-wrap{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;width:260px;transition:border-color .2s}
+.search-wrap:focus-within{border-color:var(--blue)}
+.search-wrap input{background:none;border:none;outline:none;color:var(--t1);font-family:inherit;font-size:13px;width:100%}
+.search-wrap input::placeholder{color:var(--t3)}
+.topbar-actions{display:flex;align-items:center;gap:8px}
+.icon-btn{width:34px;height:34px;border-radius:8px;background:var(--s2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t2);transition:all .15s;position:relative}
+.icon-btn:hover{border-color:var(--border2);color:var(--t1)}
+.notif-dot{width:7px;height:7px;background:var(--red);border-radius:50%;position:absolute;top:6px;right:6px;border:2px solid var(--s1)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;transition:all .15s;white-space:nowrap}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:none}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 0 16px rgba(79,142,247,.3)}
+.btn-primary:hover{box-shadow:0 0 24px rgba(79,142,247,.5)}
+.btn-ghost{background:var(--s2);color:var(--t1);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--border2)}
+.btn-success{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,.2)}
+.btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(244,63,94,.2)}
+.btn-sm{padding:5px 12px;font-size:12px}
+
+/* PAGES */
+.page{display:none;padding:28px;animation:fadeIn .25s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;gap:16px}
+.page-title{font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:24px}
+.page-sub{color:var(--t2);font-size:13px;margin-top:3px}
+.page-actions{display:flex;gap:8px;align-items:center}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.kpi{background:var(--s2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s;cursor:default}
+.kpi:hover{border-color:var(--border2);transform:translateY(-2px)}
+.kpi::before{content:'';position:absolute;top:0;right:0;width:80px;height:80px;border-radius:50%;filter:blur(40px);opacity:.4}
+.kpi.blue::before{background:var(--blue)}.kpi.green::before{background:var(--green)}.kpi.red::before{background:var(--red)}.kpi.amber::before{background:var(--amber)}
+.kpi-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;margin-bottom:10px}
+.kpi-icon.blue{background:var(--blue-dim);color:var(--blue)}.kpi-icon.green{background:var(--green-dim);color:var(--green)}.kpi-icon.red{background:var(--red-dim);color:var(--red)}.kpi-icon.amber{background:var(--amber-dim);color:var(--amber)}
+.kpi-value{font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:24px;line-height:1;margin-bottom:6px}
+.kpi-value.blue{color:var(--blue)}.kpi-value.green{color:var(--green)}.kpi-value.red{color:var(--red)}.kpi-value.amber{color:var(--amber)}
+.kpi-label{font-size:12px;color:var(--t2);font-weight:500}
+
+/* TABLE */
+.table-wrap{background:var(--s2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:20px}
+.table-toolbar{padding:16px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+.table-search{display:flex;align-items:center;gap:8px;background:var(--s3);border:1px solid var(--border);border-radius:8px;padding:6px 12px}
+.table-search input{background:none;border:none;outline:none;color:var(--t1);font-family:inherit;font-size:13px;width:200px}
+.table-search input::placeholder{color:var(--t3)}
+.ml-auto{margin-left:auto}
+table{width:100%;border-collapse:collapse}
+thead tr{border-bottom:1px solid var(--border)}
+thead th{padding:11px 16px;text-align:left;font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
+tbody tr{border-bottom:1px solid var(--border);transition:background .12s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(255,255,255,.02)}
+td{padding:13px 16px;font-size:13px;vertical-align:middle}
+.avatar-cell{display:flex;align-items:center;gap:10px}
+.mini-ava{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.status-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.status-badge::before{content:'';width:5px;height:5px;border-radius:50%}
+.s-paid{background:var(--green-dim);color:var(--green)}.s-paid::before{background:var(--green)}
+.s-pending{background:var(--amber-dim);color:var(--amber)}.s-pending::before{background:var(--amber)}
+.s-overdue{background:var(--red-dim);color:var(--red)}.s-overdue::before{background:var(--red)}
+.s-draft{background:var(--s3);color:var(--t3)}.s-draft::before{background:var(--t3)}
+.s-active{background:var(--green-dim);color:var(--green)}.s-active::before{background:var(--green)}
+.s-sent{background:var(--blue-dim);color:var(--blue)}.s-sent::before{background:var(--blue)}
+.row-actions{display:flex;gap:4px;justify-content:flex-end}
+.action-btn{width:28px;height:28px;border-radius:6px;background:var(--s3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t2);transition:all .15s}
+.action-btn:hover{border-color:var(--border2);color:var(--t1)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--s2);border:1px solid var(--border2);border-radius:14px;width:100%;max-width:580px;max-height:90vh;overflow-y:auto;animation:modalIn .2s ease;box-shadow:0 24px 80px rgba(0,0,0,.6)}
+@keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(12px)}to{opacity:1;transform:none}}
+.modal-head{padding:22px 24px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--s2);z-index:1}
+.modal-title{font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:18px;flex:1}
+.modal-close{width:30px;height:30px;border-radius:7px;background:var(--s3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t2)}
+.modal-close:hover{color:var(--t1)}
+.modal-body{padding:24px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.span2{grid-column:span 2}
+label{font-size:12px;font-weight:600;color:var(--t2)}
+input,select,textarea{background:var(--s3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--t1);font-family:inherit;font-size:13px;outline:none;transition:border-color .2s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--blue)}
+select option{background:var(--s3)}
+textarea{resize:vertical;min-height:70px}
+
+/* INVOICE LINES */
+.inv-table{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:12px}
+.inv-head{display:grid;grid-template-columns:1fr 70px 110px 100px 30px;gap:6px;padding:9px 12px;background:var(--s3);font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase}
+.inv-line{display:grid;grid-template-columns:1fr 70px 110px 100px 30px;gap:6px;padding:8px 12px;border-top:1px solid var(--border);align-items:center}
+.inv-line input{padding:6px 8px;font-size:12px}
+.inv-total{padding:14px 12px;border-top:2px solid var(--border2);display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.total-row{display:flex;gap:20px;font-size:13px;align-items:center}
+.total-row.grand{font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:16px}
+.total-label{min-width:120px;text-align:right;color:var(--t2)}
+.total-val{min-width:100px;text-align:right}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--s2);border:1px solid var(--border2);border-radius:10px;padding:12px 18px;font-size:13px;min-width:280px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,.4);animation:toastIn .3s ease;font-weight:500}
+.toast.success{border-left:3px solid var(--green)}
+.toast.error{border-left:3px solid var(--red)}
+.toast.info{border-left:3px solid var(--blue)}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+
+/* LOADING */
+.skeleton{background:linear-gradient(90deg,var(--s2) 25%,var(--s3) 50%,var(--s2) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px;height:16px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* SPINNER */
+.spinner{width:20px;height:20px;border:2px solid var(--border2);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* EMPTY */
+.empty{padding:60px 20px;text-align:center}
+.empty-icon{font-size:40px;margin-bottom:16px;opacity:.4}
+.empty-title{font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:18px;margin-bottom:8px}
+.empty-desc{font-size:13px;color:var(--t2);margin-bottom:20px}
+
+/* CARD */
+.card{background:var(--s2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.card-head{padding:18px 20px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+.card-title{font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:15px;flex:1}
+
+/* PROGRESS */
+.progress-bar{height:6px;background:var(--s3);border-radius:3px;overflow:hidden;margin-top:8px}
+.progress-fill{height:100%;border-radius:3px}
+
+/* STOCK GRID */
+.stock-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+.stock-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--radius);padding:18px;transition:border-color .2s,transform .2s}
+.stock-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.stock-thumb{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--s3)}
+
+/* SETTINGS */
+.settings-grid{display:grid;grid-template-columns:220px 1fr;gap:24px}
+.settings-nav{background:var(--s2);border:1px solid var(--border);border-radius:var(--radius);padding:8px;height:fit-content}
+.settings-nav-item{padding:9px 12px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:500;color:var(--t2);transition:all .15s;display:flex;align-items:center;gap:8px}
+.settings-nav-item:hover{background:var(--s3);color:var(--t1)}
+.settings-nav-item.active{background:var(--blue-dim);color:var(--blue)}
+.settings-panel{background:var(--s2);border:1px solid var(--border);border-radius:var(--radius);padding:28px}
+.toggle-row{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--border)}
+.toggle-row:last-child{border-bottom:none}
+.toggle-info{flex:1}
+.toggle-label{font-size:13px;font-weight:600}
+.toggle-desc{font-size:12px;color:var(--t3);margin-top:2px}
+.toggle{width:40px;height:22px;border-radius:11px;background:var(--s3);border:1px solid var(--border);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.toggle.on{background:var(--blue);border-color:var(--blue)}
+.toggle::after{content:'';width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.toggle.on::after{transform:translateX(18px)}
+
+/* PAGINATION */
+.pagination{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border)}
+.pagination-info{font-size:12px;color:var(--t3)}
+
+/* CONFIG ALERT */
+.config-alert{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);border-radius:10px;padding:16px 20px;margin-bottom:24px;display:flex;align-items:flex-start;gap:12px}
+.config-alert-icon{font-size:20px;flex-shrink:0;margin-top:1px}
+.config-alert-text{font-size:13px;color:var(--t2);line-height:1.6}
+.config-alert-text strong{color:var(--amber)}
+.config-alert a{color:var(--blue);text-decoration:none}
+.config-alert a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+
+<!-- ══════ SIDEBAR ══════ -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">N</div>
+    <div><div class="logo-name">NexaFlow</div><div class="logo-tag">Gestion Commerciale</div></div>
+  </div>
+  <nav class="nav">
+    <div class="nav-item active" onclick="goPage('dashboard',this)">
+      <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Tableau de bord
+    </div>
+    <div class="nav-label">Commercial</div>
+    <div class="nav-item" onclick="goPage('clients',this)">
+      <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      Clients <span class="nav-badge badge-blue" id="badgeClients">—</span>
+    </div>
+    <div class="nav-group-toggle open" onclick="toggleGroup(this)">
+      <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/></svg>
+      Facturation
+      <svg class="nav-group-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+    </div>
+    <div class="nav-sub open">
+      <div class="nav-item" onclick="goPage('factures',this)">Factures <span class="nav-badge badge-amber" id="badgeFactures">—</span></div>
+      <div class="nav-item" onclick="goPage('devis',this)">Devis <span class="nav-badge badge-blue" id="badgeDevis">—</span></div>
+    </div>
+    <div class="nav-group-toggle" onclick="toggleGroup(this)">
+      <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/></svg>
+      Stock
+      <svg class="nav-group-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+    </div>
+    <div class="nav-sub">
+      <div class="nav-item" onclick="goPage('stock',this)">Produits & Stock</div>
+    </div>
+    <div class="nav-label">Finances</div>
+    <div class="nav-item" onclick="goPage('tresorerie',this)">
+      <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+      Trésorerie
+    </div>
+    <div class="nav-label">Système</div>
+    <div class="nav-item" onclick="goPage('parametres',this)">
+      <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Paramètres API
+    </div>
+  </nav>
+  <div class="sidebar-user">
+    <div class="ava">DJ</div>
+    <div><div class="user-name">Djilali B.</div><div class="user-role" id="apiStatus">⚡ Configuration requise</div></div>
+  </div>
+</aside>
+
+<!-- ══════ MAIN ══════ -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="breadcrumb"><span id="breadcrumb">Tableau de bord</span></div>
+    </div>
+    <div class="search-wrap">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="color:var(--t3)"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input placeholder="Rechercher…" oninput="globalSearch(this.value)">
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-primary btn-sm" onclick="openNewModal()">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Nouveau
+      </button>
+    </div>
+  </header>
+
+  <!-- ── DASHBOARD ── -->
+  <div class="page active" id="page-dashboard">
+    <div style="padding:28px">
+      <div class="page-header">
+        <div><div class="page-title">Tableau de bord</div><div class="page-sub" id="dashSub">Chargement…</div></div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modalFacture')">+ Créer une facture</button>
+      </div>
+      <div id="configAlert" style="display:none" class="config-alert">
+        <div class="config-alert-icon">⚙️</div>
+        <div class="config-alert-text">
+          <strong>Configuration API requise</strong> — Pour connecter l'app à Supabase, allez dans 
+          <a href="#" onclick="goPage('parametres',null)">Paramètres API</a>, entrez votre URL Supabase et votre clé API key.<br>
+          Sans ça, les données ne seront pas sauvegardées.
+        </div>
+      </div>
+      <div class="kpi-grid" id="dashKpis">
+        <div class="kpi blue"><div class="kpi-icon blue">💰</div><div class="kpi-value blue skeleton" style="height:32px;width:140px;margin-bottom:6px"></div><div class="kpi-label">Chiffre d'affaires</div></div>
+        <div class="kpi green"><div class="kpi-icon green">📥</div><div class="kpi-value green skeleton" style="height:32px;width:120px;margin-bottom:6px"></div><div class="kpi-label">Encaissé ce mois</div></div>
+        <div class="kpi red"><div class="kpi-icon red">⏰</div><div class="kpi-value red skeleton" style="height:32px;width:130px;margin-bottom:6px"></div><div class="kpi-label">En attente</div></div>
+        <div class="kpi amber"><div class="kpi-icon amber">📋</div><div class="kpi-value amber skeleton" style="height:32px;width:60px;margin-bottom:6px"></div><div class="kpi-label">Devis ouverts</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="table-wrap">
+          <div class="card-head"><div class="card-title">Dernières Factures</div><button class="btn btn-ghost btn-sm" onclick="goPage('factures',null)">Voir tout →</button></div>
+          <div id="dashFactures"><div style="padding:30px;text-align:center"><div class="spinner" style="margin:0 auto"></div></div></div>
+        </div>
+        <div class="table-wrap">
+          <div class="card-head"><div class="card-title">Derniers Clients</div><button class="btn btn-ghost btn-sm" onclick="goPage('clients',null)">Voir tout →</button></div>
+          <div id="dashClients"><div style="padding:30px;text-align:center"><div class="spinner" style="margin:0 auto"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CLIENTS ── -->
+  <div class="page" id="page-clients">
+    <div style="padding:28px">
+      <div class="page-header">
+        <div><div class="page-title">Clients</div><div class="page-sub" id="clientsSub">Chargement…</div></div>
+        <div class="page-actions">
+          <button class="btn btn-ghost btn-sm" onclick="exportClients()">📤 Exporter CSV</button>
+          <button class="btn btn-primary btn-sm" onclick="openModal('modalClient')">+ Nouveau client</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <div class="table-search">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="color:var(--t3)"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input placeholder="Rechercher un client…" oninput="searchClients(this.value)">
+          </div>
+          <select onchange="filterClientsStatut(this.value)" style="background:var(--s3);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--t1);font-family:inherit;font-size:12px;width:120px">
+            <option value="">Tous</option>
+            <option value="actif">Actifs</option>
+            <option value="inactif">Inactifs</option>
+            <option value="prospect">Prospects</option>
+          </select>
+        </div>
+        <table>
+          <thead><tr><th>Entreprise</th><th>Contact</th><th>Ville</th><th>Statut</th><th>Créé le</th><th></th></tr></thead>
+          <tbody id="clientsTable"><tr><td colspan="6" style="text-align:center;padding:40px"><div class="spinner" style="margin:0 auto"></div></td></tr></tbody>
+        </table>
+        <div class="pagination">
+          <div class="pagination-info" id="clientsPaginationInfo">—</div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-ghost btn-sm" onclick="clientsPage(-1)">← Précédent</button>
+            <button class="btn btn-ghost btn-sm" onclick="clientsPage(1)">Suivant →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FACTURES ── -->
+  <div class="page" id="page-factures">
+    <div style="padding:28px">
+      <div class="page-header">
+        <div><div class="page-title">Factures</div><div class="page-sub" id="facturesSub">Chargement…</div></div>
+        <div class="page-actions">
+          <button class="btn btn-primary btn-sm" onclick="openModal('modalFacture')">+ Nouvelle facture</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px" id="factureStatCards">
+        <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:14px;cursor:pointer" onclick="filterFacturesStatut('')">
+          <div style="font-size:11px;color:var(--t3);margin-bottom:4px">TOUTES</div>
+          <div style="font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:22px" id="countAll">—</div>
+        </div>
+        <div style="background:var(--green-dim);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:14px;cursor:pointer" onclick="filterFacturesStatut('payee')">
+          <div style="font-size:11px;color:var(--green);margin-bottom:4px">PAYÉES</div>
+          <div style="font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:22px;color:var(--green)" id="countPaid">—</div>
+        </div>
+        <div style="background:var(--amber-dim);border:1px solid rgba(251,191,36,.2);border-radius:8px;padding:14px;cursor:pointer" onclick="filterFacturesStatut('envoyee')">
+          <div style="font-size:11px;color:var(--amber);margin-bottom:4px">EN ATTENTE</div>
+          <div style="font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:22px;color:var(--amber)" id="countPending">—</div>
+        </div>
+        <div style="background:var(--red-dim);border:1px solid rgba(244,63,94,.2);border-radius:8px;padding:14px;cursor:pointer" onclick="filterFacturesStatut('en_retard')">
+          <div style="font-size:11px;color:var(--red);margin-bottom:4px">EN RETARD</div>
+          <div style="font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:22px;color:var(--red)" id="countOverdue">—</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>N° Facture</th><th>Client</th><th>Date</th><th>Montant TTC</th><th>Statut</th><th></th></tr></thead>
+          <tbody id="facturesTable"><tr><td colspan="6" style="text-align:center;padding:40px"><div class="spinner" style="margin:0 auto"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DEVIS ── -->
+  <div class="page" id="page-devis">
+    <div style="padding:28px">
+      <div class="page-header">
+        <div><div class="page-title">Devis</div><div class="page-sub">Gérez vos propositions commerciales</div></div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modalDevis')">+ Nouveau devis</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>N° Devis</th><th>Client</th><th>Objet</th><th>Date</th><th>Montant TTC</th><th>Statut</th><th></th></tr></thead>
+          <tbody id="devisTable"><tr><td colspan="7" style="text-align:center;padding:40px"><div class="spinner" style="margin:0 auto"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STOCK ── -->
+  <div class="page" id="page-stock">
+    <div style="padding:28px">
+      <div class="page-header">
+        <div><div class="page-title">Produits & Stock</div><div class="page-sub" id="stockSub">Chargement…</div></div>
+        <div class="page-actions">
+          <button class="btn btn-ghost btn-sm" onclick="loadStock(true)">⚠️ Stock faible</button>
+          <button class="btn btn-primary btn-sm" onclick="openModal('modalProduit')">+ Nouveau produit</button>
+        </div>
+      </div>
+      <div class="stock-grid" id="stockGrid"><div style="grid-column:span 3;text-align:center;padding:40px"><div class="spinner" style="margin:0 auto"></div></div></div>
+    </div>
+  </div>
+
+  <!-- ── TRÉSORERIE ── -->
+  <div class="page" id="page-tresorerie">
+    <div style="padding:28px">
+      <div class="page-header">
+        <div><div class="page-title">Trésorerie</div><div class="page-sub">Flux financiers</div></div>
+      </div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="kpi green"><div class="kpi-icon green">🏦</div><div class="kpi-value green" id="tresorSolde">—</div><div class="kpi-label">Solde net</div></div>
+        <div class="kpi blue"><div class="kpi-icon blue">📈</div><div class="kpi-value blue" id="tresorEntrees">—</div><div class="kpi-label">Total entrées</div></div>
+        <div class="kpi red"><div class="kpi-icon red">📉</div><div class="kpi-value red" id="tresorSorties">—</div><div class="kpi-label">Total sorties</div></div>
+      </div>
+      <div class="table-wrap">
+        <div class="card-head"><div class="card-title">Mouvements récents</div></div>
+        <table>
+          <thead><tr><th>Date</th><th>Description</th><th>Référence</th><th>Type</th><th>Montant</th></tr></thead>
+          <tbody id="tresorTable"><tr><td colspan="5" style="text-align:center;padding:40px"><div class="spinner" style="margin:0 auto"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PARAMÈTRES API ── -->
+  <div class="page" id="page-parametres">
+    <div style="padding:28px">
+      <div class="page-header"><div><div class="page-title">Paramètres API</div><div class="page-sub">Connectez NexaFlow à votre backend Supabase</div></div></div>
+      <div style="max-width:600px">
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-head"><div class="card-title">🔗 Connexion Supabase</div></div>
+          <div style="padding:24px">
+            <div class="form-group" style="margin-bottom:14px">
+              <label>URL Supabase</label>
+              <input type="text" id="cfgUrl" placeholder="https://XXXXXXXX.supabase.co" oninput="saveConfig()">
+            </div>
+            <div class="form-group" style="margin-bottom:14px">
+              <label>Anon Key (clé publique)</label>
+              <input type="text" id="cfgKey" placeholder="eyJhbGci..." oninput="saveConfig()">
+            </div>
+            <div class="form-group" style="margin-bottom:20px">
+              <label>URL API FastAPI (optionnel si direct Supabase)</label>
+              <input type="text" id="cfgApi" placeholder="http://localhost:8000" oninput="saveConfig()">
+            </div>
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-primary" onclick="testConnection()">🔌 Tester la connexion</button>
+              <button class="btn btn-success" onclick="initDemo()">🎲 Charger données démo</button>
+            </div>
+            <div id="connStatus" style="margin-top:14px;font-size:13px;color:var(--t2)"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div class="card-title">📋 Guide d'installation</div></div>
+          <div style="padding:24px;font-size:13px;line-height:2;color:var(--t2)">
+            <div style="margin-bottom:12px"><strong style="color:var(--t1)">1. Créer un projet Supabase</strong><br>
+            Allez sur <a href="https://supabase.com" target="_blank" style="color:var(--blue)">supabase.com</a> → New Project → gratuit</div>
+            <div style="margin-bottom:12px"><strong style="color:var(--t1)">2. Exécuter le schéma SQL</strong><br>
+            Ouvrez le fichier <code style="background:var(--s3);padding:2px 6px;border-radius:4px">supabase/schema.sql</code> → copiez dans SQL Editor → Run</div>
+            <div style="margin-bottom:12px"><strong style="color:var(--t1)">3. Récupérer vos clés</strong><br>
+            Settings → API → copiez Project URL et anon key ci-dessus</div>
+            <div style="margin-bottom:12px"><strong style="color:var(--t1)">4. Lancer le backend (optionnel)</strong><br>
+            <code style="background:var(--s3);padding:2px 6px;border-radius:4px">pip install -r requirements.txt</code><br>
+            <code style="background:var(--s3);padding:2px 6px;border-radius:4px">uvicorn main:app --reload</code></div>
+            <div><strong style="color:var(--t1)">5. Tester</strong><br>Cliquez "Tester la connexion" ci-dessus ✅</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ MODAL : NOUVEAU CLIENT ══════ -->
+<div class="modal-overlay" id="modalClient">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">👤 Nouveau Client</div>
+      <div class="modal-close" onclick="closeModal('modalClient')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group span2"><label>Raison sociale *</label><input type="text" id="c_rs" placeholder="SARL MonEntreprise"></div>
+        <div class="form-group"><label>N° RC</label><input type="text" id="c_rc" placeholder="23/00-0123456B05"></div>
+        <div class="form-group"><label>N° NIF</label><input type="text" id="c_nif" placeholder="000023001234567"></div>
+        <div class="form-group"><label>N° NIS</label><input type="text" id="c_nis"></div>
+        <div class="form-group"><label>Activité</label><input type="text" id="c_act" placeholder="Informatique"></div>
+        <div class="form-group"><label>Nom du contact</label><input type="text" id="c_nom" placeholder="Prénom Nom"></div>
+        <div class="form-group"><label>Téléphone</label><input type="text" id="c_tel" placeholder="+213 XX XX XX XX"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="c_email" placeholder="contact@client.dz"></div>
+        <div class="form-group">
+          <label>Ville</label>
+          <select id="c_ville">
+            <option>Oran</option><option>Alger</option><option>Constantine</option>
+            <option>Annaba</option><option>Béjaïa</option><option>Sétif</option>
+            <option>Tlemcen</option><option>Blida</option><option>Autre</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Statut</label>
+          <select id="c_statut"><option value="actif">Actif</option><option value="prospect">Prospect</option><option value="inactif">Inactif</option></select>
+        </div>
+        <div class="form-group span2"><label>Adresse</label><input type="text" id="c_adresse" placeholder="Rue, quartier, code postal"></div>
+        <div class="form-group span2"><label>Notes</label><textarea id="c_notes" placeholder="Informations supplémentaires…"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalClient')">Annuler</button>
+      <button class="btn btn-primary" onclick="createClient()">✅ Créer le client</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ MODAL : NOUVELLE FACTURE ══════ -->
+<div class="modal-overlay" id="modalFacture">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-head">
+      <div class="modal-title">🧾 Nouvelle Facture</div>
+      <div class="modal-close" onclick="closeModal('modalFacture')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid" style="margin-bottom:16px">
+        <div class="form-group">
+          <label>Client *</label>
+          <select id="f_client"><option value="">-- Sélectionner --</option></select>
+        </div>
+        <div class="form-group">
+          <label>Date facture</label>
+          <input type="date" id="f_date">
+        </div>
+        <div class="form-group">
+          <label>Date d'échéance</label>
+          <input type="date" id="f_echeance">
+        </div>
+        <div class="form-group">
+          <label>Statut</label>
+          <select id="f_statut">
+            <option value="brouillon">Brouillon</option>
+            <option value="envoyee">Envoyée</option>
+          </select>
+        </div>
+        <div class="form-group span2">
+          <label>Objet</label>
+          <input type="text" id="f_objet" placeholder="Ex: Fourniture et installation matériel réseau">
+        </div>
+      </div>
+      <label style="font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom:8px">Lignes de facturation</label>
+      <div class="inv-table">
+        <div class="inv-head"><div>Désignation</div><div>Qté</div><div>P.U. HT (DA)</div><div>Total HT</div><div></div></div>
+        <div id="fLines">
+          <div class="inv-line">
+            <input type="text" placeholder="Article ou service">
+            <input type="number" value="1" min="0.01" step="0.01" oninput="calcInv()">
+            <input type="number" value="0" min="0" oninput="calcInv()">
+            <input type="text" value="0 DA" readonly style="background:var(--bg);color:var(--t2)">
+            <span onclick="removeInvLine(this)" style="cursor:pointer;color:var(--t3);font-size:16px">✕</span>
+          </div>
+        </div>
+        <div class="inv-total">
+          <div class="total-row"><span class="total-label">Sous-total HT</span><span class="total-val" id="inv_ht">0 DA</span></div>
+          <div class="total-row"><span class="total-label">TVA 19%</span><span class="total-val" id="inv_tva">0 DA</span></div>
+          <div class="total-row grand"><span class="total-label">Total TTC</span><span class="total-val" id="inv_ttc">0 DA</span></div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="addInvLine()" style="margin-bottom:16px">+ Ajouter ligne</button>
+      <div class="form-group">
+        <label>Notes / Conditions</label>
+        <textarea id="f_notes" placeholder="Conditions de paiement, mentions…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalFacture')">Annuler</button>
+      <button class="btn btn-primary" onclick="createFacture()">✅ Créer la facture</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ MODAL : NOUVEAU DEVIS ══════ -->
+<div class="modal-overlay" id="modalDevis">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-head">
+      <div class="modal-title">📋 Nouveau Devis</div>
+      <div class="modal-close" onclick="closeModal('modalDevis')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid" style="margin-bottom:16px">
+        <div class="form-group"><label>Client *</label><select id="d_client"><option value="">-- Sélectionner --</option></select></div>
+        <div class="form-group"><label>Date</label><input type="date" id="d_date"></div>
+        <div class="form-group"><label>Validité jusqu'au</label><input type="date" id="d_validite"></div>
+        <div class="form-group"><label>Statut</label><select id="d_statut"><option value="brouillon">Brouillon</option><option value="envoye">Envoyé</option></select></div>
+        <div class="form-group span2"><label>Objet</label><input type="text" id="d_objet" placeholder="Ex: Proposition maintenance annuelle"></div>
+      </div>
+      <label style="font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom:8px">Lignes</label>
+      <div class="inv-table">
+        <div class="inv-head"><div>Désignation</div><div>Qté</div><div>P.U. HT (DA)</div><div>Total HT</div><div></div></div>
+        <div id="dLines">
+          <div class="inv-line">
+            <input type="text" placeholder="Article ou service">
+            <input type="number" value="1" min="0.01" step="0.01" oninput="calcDev()">
+            <input type="number" value="0" min="0" oninput="calcDev()">
+            <input type="text" value="0 DA" readonly style="background:var(--bg);color:var(--t2)">
+            <span onclick="removeLine(this,'dLines','calcDev')" style="cursor:pointer;color:var(--t3);font-size:16px">✕</span>
+          </div>
+        </div>
+        <div class="inv-total">
+          <div class="total-row"><span class="total-label">Sous-total HT</span><span class="total-val" id="dev_ht">0 DA</span></div>
+          <div class="total-row"><span class="total-label">TVA 19%</span><span class="total-val" id="dev_tva">0 DA</span></div>
+          <div class="total-row grand"><span class="total-label">Total TTC</span><span class="total-val" id="dev_ttc">0 DA</span></div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="addDevLine()" style="margin-bottom:16px">+ Ajouter ligne</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalDevis')">Annuler</button>
+      <button class="btn btn-primary" onclick="createDevis()">✅ Créer le devis</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ MODAL : NOUVEAU PRODUIT ══════ -->
+<div class="modal-overlay" id="modalProduit">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">📦 Nouveau Produit</div><div class="modal-close" onclick="closeModal('modalProduit')">✕</div></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group span2"><label>Désignation *</label><input type="text" id="p_des" placeholder="Nom du produit ou service"></div>
+        <div class="form-group"><label>Référence</label><input type="text" id="p_ref" placeholder="NET-001"></div>
+        <div class="form-group"><label>Unité</label><select id="p_unite"><option>unité</option><option>bobine</option><option>lot</option><option>heure</option><option>service</option><option>kg</option><option>m</option></select></div>
+        <div class="form-group"><label>Prix vente HT (DA)</label><input type="number" id="p_pv" value="0"></div>
+        <div class="form-group"><label>Prix achat HT (DA)</label><input type="number" id="p_pa" value="0"></div>
+        <div class="form-group"><label>TVA (%)</label><input type="number" id="p_tva" value="19"></div>
+        <div class="form-group"><label>Stock actuel</label><input type="number" id="p_stk" value="0"></div>
+        <div class="form-group"><label>Stock minimum</label><input type="number" id="p_stkmin" value="5"></div>
+        <div class="form-group"><label>Stock maximum</label><input type="number" id="p_stkmax" value="50"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalProduit')">Annuler</button>
+      <button class="btn btn-primary" onclick="createProduit()">✅ Créer le produit</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ MODAL : QUICK NEW ══════ -->
+<div class="modal-overlay" id="modalNew">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-head"><div class="modal-title">Créer…</div><div class="modal-close" onclick="closeModal('modalNew')">✕</div></div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:8px">
+      <div onclick="closeModal('modalNew');openModal('modalFacture')" class="quick-opt" style="display:flex;align-items:center;gap:14px;padding:14px;border:1px solid var(--border);border-radius:10px;cursor:pointer" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="width:38px;height:38px;background:var(--blue-dim);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px">🧾</div>
+        <div><div style="font-weight:700">Nouvelle Facture</div><div style="font-size:12px;color:var(--t2)">Facturez un client</div></div>
+      </div>
+      <div onclick="closeModal('modalNew');openModal('modalDevis')" class="quick-opt" style="display:flex;align-items:center;gap:14px;padding:14px;border:1px solid var(--border);border-radius:10px;cursor:pointer" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="width:38px;height:38px;background:var(--amber-dim);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px">📋</div>
+        <div><div style="font-weight:700">Nouveau Devis</div><div style="font-size:12px;color:var(--t2)">Créez une proposition</div></div>
+      </div>
+      <div onclick="closeModal('modalNew');openModal('modalClient')" class="quick-opt" style="display:flex;align-items:center;gap:14px;padding:14px;border:1px solid var(--border);border-radius:10px;cursor:pointer" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="width:38px;height:38px;background:var(--green-dim);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px">👤</div>
+        <div><div style="font-weight:700">Nouveau Client</div><div style="font-size:12px;color:var(--t2)">Ajoutez un client</div></div>
+      </div>
+      <div onclick="closeModal('modalNew');openModal('modalProduit')" class="quick-opt" style="display:flex;align-items:center;gap:14px;padding:14px;border:1px solid var(--border);border-radius:10px;cursor:pointer" onmouseover="this.style.borderColor='var(--purple)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="width:38px;height:38px;background:var(--purple-dim);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px">📦</div>
+        <div><div style="font-weight:700">Nouveau Produit</div><div style="font-size:12px;color:var(--t2)">Ajoutez au stock</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOASTS -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+// ══════════════════════════════════════════
+// CONFIG & API
+// ══════════════════════════════════════════
+let CFG = JSON.parse(localStorage.getItem('nexaflow_cfg') || '{"url":"","key":"","api":""}');
+let clientsList = [];
+let clientsOffset = 0;
+const PAGE_SIZE = 20;
+
+function getSupabaseClient() {
+  if (!CFG.url || !CFG.key) return null;
+  return { url: CFG.url, key: CFG.key };
+}
+
+async function sbFetch(path, opts = {}) {
+  const sb = getSupabaseClient();
+  if (!sb) throw new Error('Supabase non configuré');
+  const url = sb.url + '/rest/v1/' + path;
+  const headers = {
+    'apikey': sb.key,
+    'Authorization': 'Bearer ' + sb.key,
+    'Content-Type': 'application/json',
+    'Prefer': opts.prefer || 'return=representation',
+    ...opts.headers
+  };
+  const res = await fetch(url, { method: opts.method || 'GET', headers, body: opts.body ? JSON.stringify(opts.body) : undefined });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err);
+  }
+  if (res.status === 204) return [];
+  return res.json();
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  // Load saved config
+  document.getElementById('cfgUrl').value = CFG.url || '';
+  document.getElementById('cfgKey').value = CFG.key || '';
+  document.getElementById('cfgApi').value = CFG.api || '';
+
+  const today = new Date().toISOString().split('T')[0];
+  const plus30 = new Date(Date.now() + 30*864e5).toISOString().split('T')[0];
+  document.getElementById('f_date').value = today;
+  document.getElementById('f_echeance').value = plus30;
+  document.getElementById('d_date').value = today;
+  document.getElementById('d_validite').value = plus30;
+
+  if (CFG.url && CFG.key) {
+    loadDashboard();
+    loadBadges();
+    document.getElementById('apiStatus').textContent = '✅ Supabase connecté';
+    document.getElementById('apiStatus').style.color = 'var(--green)';
+  } else {
+    document.getElementById('configAlert').style.display = 'flex';
+    document.getElementById('apiStatus').textContent = '⚡ Configuration requise';
+    loadDemoMode();
+  }
+});
+
+function saveConfig() {
+  CFG.url = document.getElementById('cfgUrl').value.trim();
+  CFG.key = document.getElementById('cfgKey').value.trim();
+  CFG.api = document.getElementById('cfgApi').value.trim();
+  localStorage.setItem('nexaflow_cfg', JSON.stringify(CFG));
+}
+
+async function testConnection() {
+  saveConfig();
+  const el = document.getElementById('connStatus');
+  el.innerHTML = '<div class="spinner" style="display:inline-block;width:16px;height:16px;margin-right:8px"></div>Test en cours…';
+  try {
+    const data = await sbFetch('clients?limit=1');
+    el.innerHTML = '✅ <span style="color:var(--green)">Connexion réussie ! ' + (Array.isArray(data) ? data.length : 0) + ' client(s) trouvé(s).</span>';
+    document.getElementById('apiStatus').textContent = '✅ Supabase connecté';
+    document.getElementById('apiStatus').style.color = 'var(--green)';
+    document.getElementById('configAlert').style.display = 'none';
+    loadDashboard(); loadBadges();
+    toast('Connexion Supabase réussie ✅', 'success');
+  } catch(e) {
+    el.innerHTML = '❌ <span style="color:var(--red)">Erreur : ' + e.message.substring(0,120) + '</span>';
+    toast('Erreur de connexion', 'error');
+  }
+}
+
+// ══════════════════════════════════════════
+// DEMO MODE (sans API)
+// ══════════════════════════════════════════
+function loadDemoMode() {
+  document.getElementById('dashSub').textContent = 'Mode démo — données locales';
+  document.getElementById('dashKpis').innerHTML = `
+    <div class="kpi blue"><div class="kpi-icon blue">💰</div><div class="kpi-value blue">1 284 500 DA</div><div class="kpi-label">Chiffre d'affaires</div></div>
+    <div class="kpi green"><div class="kpi-icon green">📥</div><div class="kpi-value green">986 000 DA</div><div class="kpi-label">Encaissé</div></div>
+    <div class="kpi red"><div class="kpi-icon red">⏰</div><div class="kpi-value red">298 500 DA</div><div class="kpi-label">En attente</div></div>
+    <div class="kpi amber"><div class="kpi-icon amber">📋</div><div class="kpi-value amber">5</div><div class="kpi-label">Devis ouverts</div></div>`;
+  document.getElementById('badgeClients').textContent = '24';
+  document.getElementById('badgeFactures').textContent = '3';
+  document.getElementById('badgeDevis').textContent = '5';
+  document.getElementById('dashFactures').innerHTML = buildDemoFacturesTable();
+  document.getElementById('dashClients').innerHTML = buildDemoClientsTable();
+}
+
+function buildDemoFacturesTable() {
+  const rows = [
+    {num:'FAC-0051',client:'SPA Techno DZ',montant:'128 000 DA',statut:'payee'},
+    {num:'FAC-0050',client:'EURL Benali',montant:'45 000 DA',statut:'en_retard'},
+    {num:'FAC-0049',client:'ETS Ramdane',montant:'87 500 DA',statut:'envoyee'},
+  ];
+  return `<table><thead><tr><th>N°</th><th>Client</th><th>Montant</th><th>Statut</th></tr></thead><tbody>
+    ${rows.map(r=>`<tr><td style="color:var(--blue);font-weight:700">${r.num}</td><td>${r.client}</td><td style="font-weight:600">${r.montant}</td><td>${statusBadge(r.statut)}</td></tr>`).join('')}
+  </tbody></table>`;
+}
+function buildDemoClientsTable() {
+  const cls = [
+    {rs:'SPA Techno DZ',ville:'Alger',statut:'actif'},
+    {rs:'EURL Benali & Fils',ville:'Oran',statut:'actif'},
+    {rs:'ETS Ramdane',ville:'Constantine',statut:'actif'},
+  ];
+  return `<table><thead><tr><th>Entreprise</th><th>Ville</th><th>Statut</th></tr></thead><tbody>
+    ${cls.map(c=>`<tr><td style="font-weight:600">${c.rs}</td><td>${c.ville}</td><td>${statusBadge(c.statut)}</td></tr>`).join('')}
+  </tbody></table>`;
+}
+
+// ══════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════
+async function loadDashboard() {
+  try {
+    const [facs, devs, clients] = await Promise.all([
+      sbFetch('factures?select=montant_ttc,statut,numero,date_facture,client_id,clients(raison_sociale)&order=created_at.desc&limit=5'),
+      sbFetch('devis?select=id,statut&statut=in.(brouillon,envoye)'),
+      sbFetch('clients?select=id,statut&statut=eq.actif')
+    ]);
+
+    const payees = facs.filter(f=>f.statut==='payee');
+    const ca = payees.reduce((s,f)=>s+f.montant_ttc,0);
+    const en_attente = facs.filter(f=>f.statut==='envoyee' || f.statut==='en_retard').reduce((s,f)=>s+f.montant_ttc,0);
+
+    document.getElementById('dashSub').textContent = `Données en temps réel — ${new Date().toLocaleDateString('fr-DZ')}`;
+    document.getElementById('dashKpis').innerHTML = `
+      <div class="kpi blue"><div class="kpi-icon blue">💰</div><div class="kpi-value blue">${fmt(ca)}</div><div class="kpi-label">CA encaissé</div></div>
+      <div class="kpi green"><div class="kpi-icon green">✅</div><div class="kpi-value green">${payees.length}</div><div class="kpi-label">Factures payées</div></div>
+      <div class="kpi red"><div class="kpi-icon red">⏰</div><div class="kpi-value red">${fmt(en_attente)}</div><div class="kpi-label">En attente</div></div>
+      <div class="kpi amber"><div class="kpi-icon amber">📋</div><div class="kpi-value amber">${devs.length}</div><div class="kpi-label">Devis ouverts</div></div>`;
+
+    // Recent factures
+    document.getElementById('dashFactures').innerHTML = `<table><thead><tr><th>N°</th><th>Client</th><th>Montant</th><th>Statut</th></tr></thead><tbody>
+      ${facs.map(f=>`<tr>
+        <td style="color:var(--blue);font-weight:700">${f.numero}</td>
+        <td>${f.clients?.raison_sociale||'—'}</td>
+        <td style="font-weight:600">${fmt(f.montant_ttc)}</td>
+        <td>${statusBadge(f.statut)}</td>
+      </tr>`).join('')}
+    </tbody></table>`;
+
+    // Recent clients
+    const cls = await sbFetch('clients?order=created_at.desc&limit=5');
+    document.getElementById('dashClients').innerHTML = `<table><thead><tr><th>Entreprise</th><th>Ville</th><th>Statut</th></tr></thead><tbody>
+      ${cls.map(c=>`<tr>
+        <td style="font-weight:600">${c.raison_sociale}</td>
+        <td>${c.ville||'—'}</td>
+        <td>${statusBadge(c.statut)}</td>
+      </tr>`).join('')}
+    </tbody></table>`;
+
+  } catch(e) { console.error(e); }
+}
+
+async function loadBadges() {
+  try {
+    const [cls, facs, devs] = await Promise.all([
+      sbFetch('clients?select=id&statut=eq.actif'),
+      sbFetch('factures?select=id&statut=in.(envoyee,en_retard)'),
+      sbFetch('devis?select=id&statut=in.(brouillon,envoye)')
+    ]);
+    document.getElementById('badgeClients').textContent = cls.length || '';
+    document.getElementById('badgeFactures').textContent = facs.length || '';
+    document.getElementById('badgeDevis').textContent = devs.length || '';
+  } catch(e) {}
+}
+
+// ══════════════════════════════════════════
+// CLIENTS
+// ══════════════════════════════════════════
+let clientsFilter = { search: '', statut: '' };
+
+async function loadClients() {
+  try {
+    let q = 'clients?order=created_at.desc';
+    if (clientsFilter.statut) q += `&statut=eq.${clientsFilter.statut}`;
+    if (clientsFilter.search) q += `&raison_sociale=ilike.*${clientsFilter.search}*`;
+    q += `&offset=${clientsOffset}&limit=${PAGE_SIZE}`;
+    const data = await sbFetch(q, { headers: { 'Prefer': 'count=exact' } });
+    clientsList = data;
+    document.getElementById('clientsSub').textContent = `${data.length} clients trouvés`;
+    document.getElementById('clientsPaginationInfo').textContent = `Affichage ${clientsOffset+1}–${clientsOffset+data.length}`;
+
+    if (!data.length) {
+      document.getElementById('clientsTable').innerHTML = `<tr><td colspan="6"><div class="empty"><div class="empty-icon">👤</div><div class="empty-title">Aucun client</div><div class="empty-desc">Créez votre premier client pour commencer.</div><button class="btn btn-primary" onclick="openModal('modalClient')">+ Nouveau client</button></div></td></tr>`;
+      return;
+    }
+    document.getElementById('clientsTable').innerHTML = data.map(c => `
+      <tr>
+        <td><div class="avatar-cell">
+          <div class="mini-ava" style="background:${colorByName(c.raison_sociale)}">${initials(c.raison_sociale)}</div>
+          <div><div style="font-weight:600">${c.raison_sociale}</div><div style="font-size:11px;color:var(--t3)">${c.rc||''}</div></div>
+        </div></td>
+        <td><div>${c.nom_contact||'—'}</div><div style="font-size:11px;color:var(--t3)">${c.email||''}</div></td>
+        <td>${c.ville||'—'}</td>
+        <td>${statusBadge(c.statut)}</td>
+        <td style="color:var(--t2)">${fmtDate(c.created_at)}</td>
+        <td><div class="row-actions">
+          <div class="action-btn" onclick="deleteClient('${c.id}')" title="Désactiver">🗑️</div>
+        </div></td>
+      </tr>`).join('');
+  } catch(e) { toast('Erreur chargement clients: '+e.message, 'error'); }
+}
+
+function searchClients(v) { clientsFilter.search=v; clientsOffset=0; loadClients(); }
+function filterClientsStatut(v) { clientsFilter.statut=v; clientsOffset=0; loadClients(); }
+function clientsPage(dir) { clientsOffset = Math.max(0, clientsOffset + dir*PAGE_SIZE); loadClients(); }
+
+async function createClient() {
+  const rs = document.getElementById('c_rs').value.trim();
+  if (!rs) { toast('La raison sociale est obligatoire', 'error'); return; }
+  try {
+    const payload = {
+      raison_sociale: rs,
+      rc: v('c_rc'), nif: v('c_nif'), nis: v('c_nis'),
+      nom_contact: v('c_nom'), telephone: v('c_tel'),
+      email: v('c_email'), adresse: v('c_adresse'),
+      ville: document.getElementById('c_ville').value,
+      statut: document.getElementById('c_statut').value,
+      notes: v('c_notes')
+    };
+    await sbFetch('clients', { method: 'POST', body: payload });
+    toast('Client créé avec succès ✅', 'success');
+    closeModal('modalClient');
+    clearForm(['c_rs','c_rc','c_nif','c_nis','c_nom','c_tel','c_email','c_adresse','c_notes']);
+    loadClients(); loadBadges();
+  } catch(e) { toast('Erreur: '+e.message, 'error'); }
+}
+
+async function deleteClient(id) {
+  if (!confirm('Désactiver ce client ?')) return;
+  try {
+    await sbFetch(`clients?id=eq.${id}`, { method: 'PATCH', body: { statut: 'inactif' }, prefer: 'return=minimal' });
+    toast('Client désactivé', 'info'); loadClients(); loadBadges();
+  } catch(e) { toast('Erreur', 'error'); }
+}
+
+async function exportClients() {
+  const data = await sbFetch('clients?order=raison_sociale');
+  const csv = ['Raison sociale,RC,NIF,Contact,Téléphone,Email,Ville,Statut',
+    ...data.map(c=>`"${c.raison_sociale}","${c.rc||''}","${c.nif||''}","${c.nom_contact||''}","${c.telephone||''}","${c.email||''}","${c.ville||''}","${c.statut}"`)
+  ].join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+  a.download = 'clients_nexaflow.csv'; a.click();
+}
+
+// ══════════════════════════════════════════
+// FACTURES
+// ══════════════════════════════════════════
+let facStatutFilter = '';
+
+async function loadFactures() {
+  try {
+    let q = 'factures?select=*,clients(raison_sociale)&order=created_at.desc';
+    if (facStatutFilter) q += `&statut=eq.${facStatutFilter}`;
+    const data = await sbFetch(q);
+
+    const all = data;
+    document.getElementById('countAll').textContent = all.length;
+    document.getElementById('countPaid').textContent = all.filter(f=>f.statut==='payee').length;
+    document.getElementById('countPending').textContent = all.filter(f=>f.statut==='envoyee').length;
+    document.getElementById('countOverdue').textContent = all.filter(f=>f.statut==='en_retard').length;
+    document.getElementById('facturesSub').textContent = `${all.length} factures`;
+
+    if (!data.length) {
+      document.getElementById('facturesTable').innerHTML = `<tr><td colspan="6"><div class="empty"><div class="empty-icon">🧾</div><div class="empty-title">Aucune facture</div><button class="btn btn-primary" onclick="openModal('modalFacture')">+ Créer une facture</button></div></td></tr>`;
+      return;
+    }
+    document.getElementById('facturesTable').innerHTML = data.map(f=>`
+      <tr>
+        <td style="color:var(--blue);font-weight:700">${f.numero}</td>
+        <td>${f.clients?.raison_sociale||'—'}</td>
+        <td style="color:var(--t2)">${fmtDate(f.date_facture)}</td>
+        <td style="font-weight:700">${fmt(f.montant_ttc)}</td>
+        <td>${statusBadge(f.statut)}</td>
+        <td><div class="row-actions">
+          <div class="action-btn" onclick="marquerPayee('${f.id}')" title="Marquer payée">✅</div>
+          <div class="action-btn" onclick="deleteFacture('${f.id}')" title="Annuler">🗑️</div>
+        </div></td>
+      </tr>`).join('');
+  } catch(e) { toast('Erreur factures: '+e.message,'error'); }
+}
+
+function filterFacturesStatut(s) { facStatutFilter=s; loadFactures(); }
+
+async function createFacture() {
+  const client_id = document.getElementById('f_client').value;
+  if (!client_id) { toast('Sélectionnez un client', 'error'); return; }
+  const lignes = getInvLines('fLines');
+  if (!lignes.length) { toast('Ajoutez au moins une ligne', 'error'); return; }
+  try {
+    // Créer via Supabase directement
+    const totaux = calcTotaux(lignes);
+    const numero = await genNumero('factures','FAC-');
+    const fac = await sbFetch('factures', { method:'POST', body: {
+      numero, client_id,
+      date_facture: document.getElementById('f_date').value,
+      date_echeance: document.getElementById('f_echeance').value,
+      statut: document.getElementById('f_statut').value,
+      objet: v('f_objet'), notes: v('f_notes'),
+      ...totaux
+    }});
+    const facture_id = fac[0].id;
+    if (lignes.length) {
+      await sbFetch('lignes_facture', { method:'POST', body: lignes.map((l,i)=>({...l,facture_id,ordre:i})) });
+    }
+    toast('Facture '+numero+' créée ✅','success');
+    closeModal('modalFacture');
+    resetInvLines();
+    loadFactures(); loadBadges();
+  } catch(e) { toast('Erreur: '+e.message,'error'); }
+}
+
+async function marquerPayee(id) {
+  try {
+    await sbFetch(`factures?id=eq.${id}`, { method:'PATCH', body:{statut:'payee'}, prefer:'return=minimal' });
+    toast('Facture marquée comme payée ✅','success'); loadFactures(); loadBadges();
+  } catch(e) { toast('Erreur','error'); }
+}
+
+async function deleteFacture(id) {
+  if (!confirm('Annuler cette facture ?')) return;
+  try {
+    await sbFetch(`factures?id=eq.${id}`, { method:'PATCH', body:{statut:'annulee'}, prefer:'return=minimal' });
+    toast('Facture annulée','info'); loadFactures();
+  } catch(e) { toast('Erreur','error'); }
+}
+
+// ══════════════════════════════════════════
+// DEVIS
+// ══════════════════════════════════════════
+async function loadDevis() {
+  try {
+    const data = await sbFetch('devis?select=*,clients(raison_sociale)&order=created_at.desc');
+    if (!data.length) {
+      document.getElementById('devisTable').innerHTML=`<tr><td colspan="7"><div class="empty"><div class="empty-icon">📋</div><div class="empty-title">Aucun devis</div><button class="btn btn-primary" onclick="openModal('modalDevis')">+ Créer un devis</button></div></td></tr>`;
+      return;
+    }
+    document.getElementById('devisTable').innerHTML = data.map(d=>`
+      <tr>
+        <td style="color:var(--blue);font-weight:700">${d.numero}</td>
+        <td>${d.clients?.raison_sociale||'—'}</td>
+        <td style="color:var(--t2)">${d.objet||'—'}</td>
+        <td style="color:var(--t2)">${fmtDate(d.date_devis)}</td>
+        <td style="font-weight:700">${fmt(d.montant_ttc)}</td>
+        <td>${statusBadge(d.statut)}</td>
+        <td><div class="row-actions">
+          <div class="action-btn" onclick="convertirDevis('${d.id}')" title="Convertir en facture">🧾</div>
+        </div></td>
+      </tr>`).join('');
+  } catch(e) { toast('Erreur devis: '+e.message,'error'); }
+}
+
+async function createDevis() {
+  const client_id = document.getElementById('d_client').value;
+  if (!client_id) { toast('Sélectionnez un client','error'); return; }
+  const lignes = getInvLines('dLines');
+  if (!lignes.length) { toast('Ajoutez au moins une ligne','error'); return; }
+  try {
+    const totaux = calcTotaux(lignes);
+    const numero = await genNumero('devis','DEV-');
+    const dev = await sbFetch('devis', { method:'POST', body: {
+      numero, client_id,
+      date_devis: document.getElementById('d_date').value,
+      date_validite: document.getElementById('d_validite').value,
+      statut: document.getElementById('d_statut').value,
+      objet: v('d_objet'), ...totaux
+    }});
+    const devis_id = dev[0].id;
+    if (lignes.length) {
+      await sbFetch('lignes_devis', { method:'POST', body: lignes.map((l,i)=>({...l,devis_id,ordre:i})) });
+    }
+    toast('Devis '+numero+' créé ✅','success');
+    closeModal('modalDevis'); loadDevis(); loadBadges();
+  } catch(e) { toast('Erreur: '+e.message,'error'); }
+}
+
+async function convertirDevis(id) {
+  if (!confirm('Convertir ce devis en facture ?')) return;
+  try {
+    const dev = await sbFetch(`devis?id=eq.${id}&select=*`);
+    const d = dev[0];
+    const lignes = await sbFetch(`lignes_devis?devis_id=eq.${id}`);
+    const numero = await genNumero('factures','FAC-');
+    const fac = await sbFetch('factures', { method:'POST', body: {
+      numero, client_id:d.client_id, date_facture:new Date().toISOString().split('T')[0],
+      statut:'brouillon', objet:d.objet, montant_ht:d.montant_ht,
+      montant_tva:d.montant_tva, montant_ttc:d.montant_ttc, sous_total:d.sous_total
+    }});
+    const facture_id = fac[0].id;
+    if (lignes.length) {
+      const lines = lignes.map(l=>{ const nl={...l}; delete nl.id; delete nl.devis_id; nl.facture_id=facture_id; return nl; });
+      await sbFetch('lignes_facture',{method:'POST',body:lines});
+    }
+    await sbFetch(`devis?id=eq.${id}`,{method:'PATCH',body:{statut:'converti',facture_id},prefer:'return=minimal'});
+    toast('Devis converti en facture '+numero+' ✅','success');
+    loadDevis(); loadFactures(); loadBadges();
+  } catch(e) { toast('Erreur: '+e.message,'error'); }
+}
+
+// ══════════════════════════════════════════
+// STOCK
+// ══════════════════════════════════════════
+async function loadStock(faiblSeulement=false) {
+  try {
+    let data = await sbFetch('produits?actif=eq.true&order=designation');
+    if (faiblSeulement) data = data.filter(p=>p.stock_actuel <= p.stock_min);
+    document.getElementById('stockSub').textContent = `${data.length} produits — ${data.filter(p=>p.stock_actuel<=p.stock_min).length} en alerte`;
+    const icons = {'NET':'🖥️','CAB':'🔌','CAM':'📷','PRN':'🖨️','UPS':'⚡','default':'📦'};
+    const getIcon = ref => icons[ref?.split('-')[0]] || icons.default;
+    const pct = p => Math.round((p.stock_actuel/(p.stock_max||1))*100);
+    const color = p => p.stock_actuel <= p.stock_min ? 'var(--red)' : p.stock_actuel < (p.stock_max||1)*.4 ? 'var(--amber)' : 'var(--green)';
+    document.getElementById('stockGrid').innerHTML = (!data.length
+      ? `<div style="grid-column:span 3"><div class="empty"><div class="empty-icon">📦</div><div class="empty-title">Aucun produit</div><button class="btn btn-primary" onclick="openModal('modalProduit')">+ Nouveau produit</button></div></div>`
+      : data.map(p=>`
+        <div class="stock-card">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+            <div class="stock-thumb">${getIcon(p.reference)}</div>
+            <div><div style="font-weight:600;font-size:13px">${p.designation}</div><div style="font-size:11px;color:var(--t3)">${p.reference||''}</div></div>
+          </div>
+          <div style="font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:22px;color:${color(p)}">${p.stock_actuel}</div>
+          <div style="font-size:11px;color:var(--t3);margin-bottom:8px">${p.unite} disponible(s)</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct(p)}%;background:${color(p)}"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-top:4px"><span>Min: ${p.stock_min}</span><span>Max: ${p.stock_max}</span></div>
+          <div style="display:flex;gap:6px;margin-top:12px">
+            <div class="action-btn" onclick="mvtStock('${p.id}','entree')" title="Entrée stock">📥</div>
+            <div class="action-btn" onclick="mvtStock('${p.id}','sortie')" title="Sortie stock">📤</div>
+          </div>
+        </div>`).join(''));
+  } catch(e) { toast('Erreur stock: '+e.message,'error'); }
+}
+
+async function createProduit() {
+  const des = v('p_des');
+  if (!des) { toast('La désignation est obligatoire','error'); return; }
+  try {
+    await sbFetch('produits',{method:'POST',body:{
+      designation:des, reference:v('p_ref'),
+      unite:document.getElementById('p_unite').value,
+      prix_vente:parseFloat(v('p_pv')||0),
+      prix_achat:parseFloat(v('p_pa')||0),
+      tva:parseFloat(v('p_tva')||19),
+      stock_actuel:parseInt(v('p_stk')||0),
+      stock_min:parseInt(v('p_stkmin')||5),
+      stock_max:parseInt(v('p_stkmax')||50),
+      actif:true
+    }});
+    toast('Produit créé ✅','success');
+    closeModal('modalProduit');
+    clearForm(['p_des','p_ref']);
+    loadStock();
+  } catch(e) { toast('Erreur: '+e.message,'error'); }
+}
+
+async function mvtStock(id, type) {
+  const qte = prompt(type==='entree'?'Quantité à ajouter:':'Quantité à retirer:');
+  if (!qte || isNaN(qte)) return;
+  try {
+    const prod = await sbFetch(`produits?id=eq.${id}&select=stock_actuel`);
+    const avant = prod[0].stock_actuel;
+    const apres = type==='entree' ? avant+parseFloat(qte) : Math.max(0,avant-parseFloat(qte));
+    await sbFetch(`produits?id=eq.${id}`,{method:'PATCH',body:{stock_actuel:apres},prefer:'return=minimal'});
+    await sbFetch('mouvements_stock',{method:'POST',body:{produit_id:id,type,quantite:parseFloat(qte),stock_avant:avant,stock_apres:apres}});
+    toast(`Stock mis à jour: ${avant} → ${apres}`,'success');
+    loadStock();
+  } catch(e) { toast('Erreur','error'); }
+}
+
+// ══════════════════════════════════════════
+// TRÉSORERIE
+// ══════════════════════════════════════════
+async function loadTresorerie() {
+  try {
+    const data = await sbFetch('tresorerie?order=date_mouvement.desc&limit=50');
+    const entrees = data.filter(t=>t.type==='entree').reduce((s,t)=>s+t.montant,0);
+    const sorties = data.filter(t=>t.type==='sortie').reduce((s,t)=>s+t.montant,0);
+    document.getElementById('tresorSolde').textContent = fmt(entrees-sorties);
+    document.getElementById('tresorEntrees').textContent = fmt(entrees);
+    document.getElementById('tresorSorties').textContent = fmt(sorties);
+    document.getElementById('tresorTable').innerHTML = data.map(t=>`
+      <tr>
+        <td>${fmtDate(t.date_mouvement)}</td>
+        <td>${t.description||'—'}</td>
+        <td style="color:var(--t2)">${t.reference||'—'}</td>
+        <td><span style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${t.type==='entree'?'var(--green-dim)':'var(--red-dim)'};color:${t.type==='entree'?'var(--green)':'var(--red)'}">${t.type==='entree'?'Entrée':'Sortie'}</span></td>
+        <td style="font-weight:700;color:${t.type==='entree'?'var(--green)':'var(--red)'}">${t.type==='entree'?'+':'-'}${fmt(t.montant)}</td>
+      </tr>`).join('');
+  } catch(e) { toast('Erreur trésorerie','error'); }
+}
+
+// ══════════════════════════════════════════
+// DEMO DATA INIT
+// ══════════════════════════════════════════
+async function initDemo() {
+  if (!CFG.url || !CFG.key) { toast('Configurez Supabase d\'abord','error'); return; }
+  if (!confirm('Insérer des données de démo dans votre Supabase ?')) return;
+  try {
+    // ── Clients : toutes les lignes ont exactement les mêmes clés ──
+    const clientsDemo = [
+      {raison_sociale:'SPA Techno DZ',      rc:'23/00-1234567B05',nif:'000023001234567',nis:null,art:null,nom_contact:'Karim Berrabah',  telephone:'+213 21 XX XX XX',email:'karim@techno.dz',         adresse:null,ville:'Alger',      wilaya:null,statut:'actif',  notes:null},
+      {raison_sociale:'EURL Benali & Fils', rc:'23/00-7654321B05',nif:'000023007654321',nis:null,art:null,nom_contact:'Mohamed Benali',  telephone:'+213 41 XX XX XX',email:'m.benali@gmail.com',       adresse:null,ville:'Oran',       wilaya:null,statut:'actif',  notes:null},
+      {raison_sociale:'ETS Ramdane',        rc:'23/00-9876543B05',nif:'000023009876543',nis:null,art:null,nom_contact:'Samir Ramdane',   telephone:'+213 31 XX XX XX',email:'ets.ramdane@outlook.com',  adresse:null,ville:'Constantine',wilaya:null,statut:'actif',  notes:null},
+      {raison_sociale:'SARL InfoPro',       rc:'23/00-3456789B05',nif:'000023003456789',nis:null,art:null,nom_contact:'Nassim Hadj',     telephone:'+213 41 XX XX XX',email:'nassim@infopro.dz',        adresse:null,ville:'Oran',       wilaya:null,statut:'actif',  notes:null},
+      {raison_sociale:'SARL MediTech',      rc:'23/00-9012345B05',nif:'000023009012345',nis:null,art:null,nom_contact:'Fatima Zerrouki', telephone:'+213 41 XX XX XX',email:'f.zerrouki@meditech.dz',   adresse:null,ville:'Oran',       wilaya:null,statut:'prospect',notes:null},
+    ];
+    // Insérer un par un pour éviter les conflits
+    for (const c of clientsDemo) {
+      try { await sbFetch('clients',{method:'POST',body:c}); } catch(e) { /* déjà existant, on ignore */ }
+    }
+
+    // ── Produits : toutes les lignes ont exactement les mêmes clés ──
+    const produitsDemo = [
+      {reference:'NET-024',designation:'Switch 24 ports Cisco',       description:null,unite:'unité',  prix_vente:45000,prix_achat:32000,tva:19,stock_actuel:14,stock_min:5, stock_max:20,categorie:'Réseau',   actif:true},
+      {reference:'CAB-001',designation:'Câble RJ45 Cat6 bobine 305m', description:null,unite:'bobine', prix_vente:8500, prix_achat:6000, tva:19,stock_actuel:8, stock_min:10,stock_max:50,categorie:'Câblage',  actif:true},
+      {reference:'CAM-004',designation:'Caméra IP Hikvision 4MP',     description:null,unite:'unité',  prix_vente:28000,prix_achat:19000,tva:19,stock_actuel:12,stock_min:10,stock_max:30,categorie:'Sécurité', actif:true},
+      {reference:'PRN-002',designation:'Imprimante Laser HP 408dn',   description:null,unite:'unité',  prix_vente:65000,prix_achat:48000,tva:19,stock_actuel:6, stock_min:2, stock_max:10,categorie:'Bureautique',actif:true},
+      {reference:'UPS-003',designation:'Onduleur APC 1500VA',         description:null,unite:'unité',  prix_vente:32000,prix_achat:22000,tva:19,stock_actuel:2, stock_min:5, stock_max:20,categorie:'Énergie',   actif:true},
+    ];
+    for (const p of produitsDemo) {
+      try { await sbFetch('produits',{method:'POST',body:p}); } catch(e) { /* déjà existant */ }
+    }
+
+    toast('Données démo insérées ✅  (5 clients + 5 produits)','success');
+    loadDashboard(); loadBadges();
+  } catch(e) { toast('Erreur: '+e.message,'error'); }
+}
+
+// ══════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════
+function fmt(n) { return (n||0).toLocaleString('fr-DZ',{maximumFractionDigits:0}) + ' DA'; }
+function fmtDate(d) { if(!d) return '—'; return new Date(d).toLocaleDateString('fr-DZ'); }
+function v(id) { const el=document.getElementById(id); return el?(el.value.trim()||null):null; }
+function initials(s) { return (s||'').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase(); }
+function colorByName(s) {
+  const colors=['var(--blue-dim)','var(--green-dim)','var(--amber-dim)','var(--purple-dim)'];
+  let h=0; for(let c of (s||'')) h+=c.charCodeAt(0);
+  return colors[h%colors.length];
+}
+function clearForm(ids) { ids.forEach(id=>{const el=document.getElementById(id);if(el)el.value=''}); }
+
+function statusBadge(s) {
+  const map = {
+    payee:'<span class="status-badge s-paid">Payée</span>',
+    envoyee:'<span class="status-badge s-sent">Envoyée</span>',
+    en_retard:'<span class="status-badge s-overdue">En retard</span>',
+    brouillon:'<span class="status-badge s-draft">Brouillon</span>',
+    actif:'<span class="status-badge s-active">Actif</span>',
+    inactif:'<span class="status-badge s-draft">Inactif</span>',
+    prospect:'<span class="status-badge s-sent">Prospect</span>',
+    envoye:'<span class="status-badge s-sent">Envoyé</span>',
+    accepte:'<span class="status-badge s-paid">Accepté</span>',
+    refuse:'<span class="status-badge s-overdue">Refusé</span>',
+    converti:'<span class="status-badge s-active">Converti</span>',
+    annulee:'<span class="status-badge s-draft">Annulée</span>',
+  };
+  return map[s] || `<span class="status-badge s-draft">${s||'—'}</span>`;
+}
+
+async function genNumero(table, prefixe) {
+  const data = await sbFetch(`${table}?select=numero&order=numero.desc&limit=1`);
+  let num = 1;
+  if (data.length) {
+    const last = data[0].numero?.replace(prefixe,'');
+    if (!isNaN(last)) num = parseInt(last)+1;
+  }
+  return prefixe + String(num).padStart(4,'0');
+}
+
+function calcTotaux(lignes) {
+  let ht=0, tva_total=0;
+  lignes.forEach(l=>{
+    const ligne_ht = l.quantite * l.prix_unitaire;
+    const ligne_tva = ligne_ht * (l.tva/100);
+    l.montant_ht = Math.round(ligne_ht*100)/100;
+    l.montant_ttc = Math.round((ligne_ht+ligne_tva)*100)/100;
+    ht += ligne_ht; tva_total += ligne_tva;
+  });
+  return {
+    sous_total: Math.round(ht*100)/100,
+    montant_ht: Math.round(ht*100)/100,
+    montant_tva: Math.round(tva_total*100)/100,
+    montant_ttc: Math.round((ht+tva_total)*100)/100
+  };
+}
+
+function getInvLines(containerId) {
+  const rows = document.querySelectorAll(`#${containerId} .inv-line`);
+  const result = [];
+  rows.forEach(row=>{
+    const inputs = row.querySelectorAll('input');
+    const des = inputs[0].value.trim();
+    const qte = parseFloat(inputs[1].value)||0;
+    const pu = parseFloat(inputs[2].value)||0;
+    if (des && (qte>0||pu>0)) result.push({designation:des,quantite:qte,prix_unitaire:pu,tva:19,unite:'unité'});
+  });
+  return result;
+}
+
+function calcInv() {
+  let ht=0, tva=0;
+  document.querySelectorAll('#fLines .inv-line').forEach(row=>{
+    const inputs=row.querySelectorAll('input');
+    const q=parseFloat(inputs[1].value)||0, p=parseFloat(inputs[2].value)||0;
+    const t=q*p; inputs[3].value=t.toLocaleString('fr-DZ')+' DA';
+    ht+=t; tva+=t*.19;
+  });
+  document.getElementById('inv_ht').textContent=fmt(ht);
+  document.getElementById('inv_tva').textContent=fmt(tva);
+  document.getElementById('inv_ttc').textContent=fmt(ht+tva);
+}
+
+function calcDev() {
+  let ht=0, tva=0;
+  document.querySelectorAll('#dLines .inv-line').forEach(row=>{
+    const inputs=row.querySelectorAll('input');
+    const q=parseFloat(inputs[1].value)||0, p=parseFloat(inputs[2].value)||0;
+    const t=q*p; inputs[3].value=t.toLocaleString('fr-DZ')+' DA';
+    ht+=t; tva+=t*.19;
+  });
+  document.getElementById('dev_ht').textContent=fmt(ht);
+  document.getElementById('dev_tva').textContent=fmt(tva);
+  document.getElementById('dev_ttc').textContent=fmt(ht+tva);
+}
+
+function addInvLine() {
+  const div=document.createElement('div'); div.className='inv-line';
+  div.innerHTML=`<input type="text" placeholder="Article ou service"><input type="number" value="1" min="0.01" step="0.01" oninput="calcInv()"><input type="number" value="0" min="0" oninput="calcInv()"><input type="text" value="0 DA" readonly style="background:var(--bg);color:var(--t2)"><span onclick="removeInvLine(this)" style="cursor:pointer;color:var(--t3);font-size:16px">✕</span>`;
+  document.getElementById('fLines').appendChild(div);
+}
+
+function addDevLine() {
+  const div=document.createElement('div'); div.className='inv-line';
+  div.innerHTML=`<input type="text" placeholder="Article ou service"><input type="number" value="1" min="0.01" step="0.01" oninput="calcDev()"><input type="number" value="0" min="0" oninput="calcDev()"><input type="text" value="0 DA" readonly style="background:var(--bg);color:var(--t2)"><span onclick="removeLine(this,'dLines','calcDev')" style="cursor:pointer;color:var(--t3);font-size:16px">✕</span>`;
+  document.getElementById('dLines').appendChild(div);
+}
+
+function removeInvLine(el) {
+  const rows=document.querySelectorAll('#fLines .inv-line');
+  if(rows.length>1){el.closest('.inv-line').remove();calcInv();}
+}
+function removeLine(el,cont,calcFn) {
+  const rows=document.querySelectorAll(`#${cont} .inv-line`);
+  if(rows.length>1){el.closest('.inv-line').remove();window[calcFn]();}
+}
+function resetInvLines() {
+  document.getElementById('fLines').innerHTML=`<div class="inv-line"><input type="text" placeholder="Article ou service"><input type="number" value="1" min="0.01" step="0.01" oninput="calcInv()"><input type="number" value="0" min="0" oninput="calcInv()"><input type="text" value="0 DA" readonly style="background:var(--bg);color:var(--t2)"><span onclick="removeInvLine(this)" style="cursor:pointer;color:var(--t3);font-size:16px">✕</span></div>`;
+  calcInv();
+}
+
+// ── Fill client dropdowns ──
+async function fillClientDropdowns() {
+  if (!CFG.url || !CFG.key) return;
+  try {
+    const data = await sbFetch('clients?statut=eq.actif&order=raison_sociale&select=id,raison_sociale');
+    ['f_client','d_client'].forEach(id=>{
+      const sel = document.getElementById(id);
+      if (!sel) return;
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">-- Sélectionner --</option>' + data.map(c=>`<option value="${c.id}">${c.raison_sociale}</option>`).join('');
+      if (cur) sel.value = cur;
+    });
+  } catch(e) {}
+}
+
+// ── NAV ──
+const pageNames = {dashboard:'Tableau de bord',clients:'Clients',factures:'Factures',devis:'Devis',stock:'Stock',tresorerie:'Trésorerie',parametres:'Paramètres API'};
+const pageLoaders = {clients:loadClients,factures:loadFactures,devis:loadDevis,stock:loadStock,tresorerie:loadTresorerie,dashboard:()=>{if(CFG.url&&CFG.key)loadDashboard();}};
+
+function goPage(id, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id)?.classList.add('active');
+  if (el) el.classList.add('active');
+  document.getElementById('breadcrumb').textContent = pageNames[id]||id;
+  if (pageLoaders[id] && (CFG.url && CFG.key)) pageLoaders[id]();
+  if (['factures','devis'].includes(id)) fillClientDropdowns();
+}
+
+function toggleGroup(el) {
+  el.classList.toggle('open');
+  el.nextElementSibling?.classList.toggle('open');
+}
+
+// ── MODALS ──
+function openModal(id) {
+  document.getElementById(id)?.classList.add('open');
+  if (['modalFacture','modalDevis'].includes(id)) fillClientDropdowns();
+}
+function closeModal(id) { document.getElementById(id)?.classList.remove('open'); }
+function openNewModal() { openModal('modalNew'); }
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
+
+// ── SEARCH ──
+function globalSearch(q) {
+  if (!q) return;
+  if (document.getElementById('page-clients').classList.contains('active')) searchClients(q);
+}
+
+// ── TOAST ──
+function toast(msg, type='info') {
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${type==='success'?'✅':type==='error'?'❌':'ℹ️'}</span> ${msg}`;
+  document.getElementById('toastWrap').appendChild(t);
+  setTimeout(()=>t.remove(), 3500);
+}
+</script>
+</body>
+</html>
